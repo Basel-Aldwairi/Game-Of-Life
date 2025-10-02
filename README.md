@@ -10,6 +10,8 @@ ___
 - Right Click: Place Dead Cell
 - Right arrow: Move single step
 - Left arrow: Auto step
+- Up arrow: Increase Auto Step Speed
+- Down arrow: Decrease Auto Step Speed
 
 ___
 

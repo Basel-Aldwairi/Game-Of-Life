@@ -25,6 +25,10 @@ clock = pygame.time.Clock()
 font = pygame.font.Font(None,24)
 running = True
 auto_step = False
+spead_list = [1,5,10,15,20,30,40,50,100,200]
+spead = 2
+generation = 0
+population = 0
 
 #  Draw the grid on the Pygame window
 def draw():
@@ -45,10 +49,13 @@ def get_number_of_neighbors(x,y):
     alive_count = neighbors.sum()
     return alive_count
 
+def get_population():
+    global grid
+    return grid.sum()
 
 # Simulation Physics
 def sim_step():
-    global grid
+    global grid, generation
     next_grid = np.zeros((ROWS,COLS),dtype=np.uint8)
     for ny in range(ROWS):
         for nx in range(COLS):
@@ -62,6 +69,7 @@ def sim_step():
             alive_state = (alive_state and (n2 or n3) )or (not alive_state and n3)
             next_grid[ny,nx] = 1 if alive_state else 0
     # Update grid
+    generation += 1
     grid = next_grid.copy()
 
 
@@ -94,13 +102,44 @@ while running:
         if key_pressed == pygame.K_LEFT:
             auto_step = not auto_step
 
+            # Up & Down arrows: Increase & Decrease auto_step speed
+        if key_pressed == pygame.K_UP:
+            spead = (spead + 1) % len(spead_list)
+
+        if key_pressed == pygame.K_DOWN:
+            spead = (spead - 1) % len(spead_list)
+
     if auto_step:
         sim_step()
 
     screen.fill((0,0,0))
     draw()
 
+    # Show Current Information
+    text_dict = {
+        'Population' : get_population(),
+        'Generation' : generation,
+        'Speed' : spead_list[spead],
+        'Auto Step' : auto_step
+    }
+
+    y_text = 10
+    x_text = 100
+    for key, value in text_dict.items():
+
+        key_text = font.render(str(key), True,(255,255,255))
+        value_text = font.render(f' :    {value}', True,(255,255,255))
+        screen.blit(key_text,(x_text,y_text))
+        screen.blit(value_text, (x_text + 100, y_text))
+        y_text += 24
+
+
     pygame.display.flip()
-    clock.tick(10)
+
+    # Change Clock Speed based on auto_step
+    if auto_step:
+        clock.tick(spead_list[spead])
+    else:
+        clock.tick(60)
 
 pygame.quit()
